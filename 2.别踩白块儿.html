@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>别踩白块儿</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            pointer-events: none;
+        }
+        
+        .main {
+            margin: 50px auto;
+            width: 400px;
+            height: 620px;
+            border: 1px solid burlywood;
+            overflow: hidden;
+        }
+        
+        .main h2 {
+            text-align: center;
+            height: 60px;
+            line-height: 60px;
+            border-bottom: 1px solid red;
+            background-color: #fff;
+        }
+        
+        .container {
+            position: relative;
+            overflow: hidden;
+            top: -140px;
+            z-index: -1;
+            pointer-events: auto;
+        }
+        
+        .row {
+            height: 140px;
+            /* 消除子元素水平间隙问题 */
+            font-size: 0;
+        }
+        
+        .cell {
+            display: inline-block;
+            width: 100px;
+            height: 140px;
+        }
+        
+        .black {
+            background-color: black;
+        }
+        
+        .pass {
+            background-color: azure;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <h2>分数：<span class="score">0</span></h2>
+        <div class="container">
+
+        </div>
+    </div>
+    <script src="./jQuery.min.js"></script>
+    <script>
+        // 记录分数
+        var count = 0;
+        // 下滑速度
+        var speed = 5;
+        // 初始化
+        // 创建新的row，并添加到container上层
+        for (let i = 0; i < 4; i++) {
+            createRow();
+        }
+        // 创建一行
+        function createRow(className) {
+            var row = document.createElement('div');
+            row.className = 'row';
+            for (let i = 0; i < 4; i++) {
+                var cell = document.createElement('div');
+                cell.className = 'cell';
+                row.appendChild(cell);
+            };
+            var random = Math.floor(Math.random() * 4);
+            // console.log(random);
+            row.children[random].className = 'cell black';
+            $('.container').prepend(row);
+        };
+
+
+        var timer = setInterval(() => {
+            move();
+        }, 50);
+
+        // 下滑
+        function move() {
+            var up = parseInt($('.container').css('top'));
+            if (speed + up > 0) {
+                up = 0;
+            } else {
+                up += speed;
+            }
+            $('.container').css('top', up);
+
+            if (up == 0) {
+                createRow();
+                $('.container').css('top', -140);
+                if ($('.container').children().length == 6) {
+                    removeCell();
+                };
+            } else if (up == -140 + speed) {
+                var rows = $('.container').children();
+                if (rows.length == 5) {
+
+                    if (!$(rows[rows.length - 1]).children().hasClass('pass')) {
+                        fail();
+                    }
+                }
+            }
+        }
+        // 删除元素
+        function removeCell() {
+            var s = $('.container').children().last();
+            s.remove();
+        }
+
+        // 游戏失败
+        function fail() {
+            clearInterval(timer);
+            alert('Game Over! Your Score is ' + count + '.');
+            count = 0;
+            speed = 5;
+        }
+
+        // 速度增加
+        function speedUp() {
+            if (count % 5 == 0) {
+                speed += 5;
+            };
+        }
+
+        // 点击黑块
+        $('.container').on('click', '.black', function() {
+            $(this).removeClass('black').addClass('pass');
+            count++;
+            speedUp();
+            $('.score').text(count);
+        });
+    </script>
+</body>
+
+</html>
